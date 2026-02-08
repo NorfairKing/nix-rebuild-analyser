@@ -1,0 +1,12 @@
+{
+    "fileToOutputs": {
+        "src/Main.hs": [
+            "packages.x86_64-linux.default"
+        ]
+    },
+    "outputToFiles": {
+        "packages.x86_64-linux.default": [
+            "src/Main.hs"
+        ]
+    }
+}

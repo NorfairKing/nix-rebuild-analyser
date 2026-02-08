@@ -1,0 +1,24 @@
+{
+    "fileToOutputs": {
+        "pkg-a/Util.hs": [
+            "packages.x86_64-linux.both",
+            "packages.x86_64-linux.pkg-a-only"
+        ],
+        "pkg-b/Util.hs": [
+            "packages.x86_64-linux.both",
+            "packages.x86_64-linux.pkg-b-only"
+        ]
+    },
+    "outputToFiles": {
+        "packages.x86_64-linux.both": [
+            "pkg-a/Util.hs",
+            "pkg-b/Util.hs"
+        ],
+        "packages.x86_64-linux.pkg-a-only": [
+            "pkg-a/Util.hs"
+        ],
+        "packages.x86_64-linux.pkg-b-only": [
+            "pkg-b/Util.hs"
+        ]
+    }
+}

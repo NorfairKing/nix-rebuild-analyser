@@ -8,7 +8,13 @@
       "Bash(nix-store:*)",
       "Bash(./result/bin/nix-rebuild-analyser:*)",
       "Bash(stack build:*)",
-      "Bash(stack exec:*)"
+      "Bash(stack exec:*)",
+      "Bash(cabal2nix:*)",
+      "Bash(default.nix)",
+      "Bash(nix-shell:*)",
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(stack test:*)"
     ],
     "deny": [],
     "ask": []

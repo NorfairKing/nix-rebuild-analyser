@@ -14,7 +14,7 @@ import Data.Aeson (ToJSON (..), (.=))
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.KeyMap as KeyMap
 import qualified Data.ByteString.Lazy as LB
-import Data.List (isPrefixOf, isSuffixOf)
+import Data.List (isPrefixOf)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (mapMaybe)
@@ -77,6 +77,16 @@ getGitFiles flakeDir = do
             ]
       pure $ Right files
 
+-- | A source file paired with the name of the store path it came from.
+-- The store path name is used to match against git file prefixes.
+data SourceFile = SourceFile
+  { -- | The name portion of the store path (e.g., "nix-ci-blog" from "/nix/store/xxx-nix-ci-blog")
+    sourceFileStorePathName :: !Text,
+    -- | The relative path within the store path
+    sourceFileRelPath :: !(Path Rel File)
+  }
+  deriving (Show, Eq, Ord)
+
 -- | Analyse which files affect which outputs using static derivation analysis.
 -- This parses `nix derivation show --recursive` to find source store paths
 -- for each output, then lists files in those paths.
@@ -89,7 +99,7 @@ analyseAll flakeDir outputs files = do
   logInfoN "Analysing derivation dependencies (static analysis)..."
 
   -- For each output, find its source store paths and list files (in parallel)
-  outputToFilesMap <-
+  outputToSourceFilesMap <-
     fmap Map.fromList $
       pooledMapConcurrently
         ( \output -> do
@@ -102,7 +112,7 @@ analyseAll flakeDir outputs files = do
 
   -- Match git files to source files and build mappings
   let gitFileSet = Set.fromList files
-      (fileToOutputsMap, matchedOutputToFiles) = buildFileToOutputs gitFileSet outputToFilesMap
+      (fileToOutputsMap, matchedOutputToFiles) = buildFileToOutputs gitFileSet outputToSourceFilesMap
 
   pure
     AnalysisResult
@@ -114,7 +124,7 @@ analyseAll flakeDir outputs files = do
 getOutputSourceFiles ::
   Path Abs Dir ->
   FlakeOutput ->
-  LoggingT IO (Set (Path Rel File))
+  LoggingT IO (Set SourceFile)
 getOutputSourceFiles flakeDir output = do
   let attr = ".#" <> Text.unpack (flakeOutputAttribute output)
       processConfig =
@@ -131,7 +141,7 @@ getOutputSourceFiles flakeDir output = do
               -- Filter to source directories (not builder scripts)
               sourcePaths = filter isSourcePath allInputSrcs
           -- List files in each source path and convert to relative paths
-          allFiles <- concat <$> mapM listSourceFiles sourcePaths
+          allFiles <- concat <$> mapM listSourceFilesWithStoreName sourcePaths
           pure $ Set.fromList allFiles
         _ -> pure Set.empty
 
@@ -167,10 +177,24 @@ isSourcePath path =
         ".cabal"
       ]
 
--- | List files in a source store path, converting to relative paths
-listSourceFiles :: Text -> LoggingT IO [Path Rel File]
-listSourceFiles storePathText = do
+-- | Extract the name portion from a Nix store path.
+-- E.g., "/nix/store/abc123-nix-ci-blog" -> "nix-ci-blog"
+extractStorePathName :: Text -> Text
+extractStorePathName storePathText =
+  case Text.splitOn "/" storePathText of
+    -- /nix/store/hash-name -> ["", "nix", "store", "hash-name"]
+    (_empty : _nix : _store : hashName : _rest) ->
+      -- Strip the hash prefix (everything before and including the first dash)
+      case Text.breakOn "-" hashName of
+        (_, rest) | not (Text.null rest) -> Text.drop 1 rest -- drop the leading dash
+        _ -> hashName -- no dash found, use as-is
+    _ -> storePathText -- fallback to full path
+
+-- | List files in a source store path, returning SourceFile with the store path name
+listSourceFilesWithStoreName :: Text -> LoggingT IO [SourceFile]
+listSourceFilesWithStoreName storePathText = do
   let storePath = Text.unpack storePathText
+      storePathName = extractStorePathName storePathText
   case parseAbsDir (storePath ++ "/") of
     Nothing -> pure []
     Just absDir -> do
@@ -179,7 +203,8 @@ listSourceFiles storePathText = do
         then do
           (_, files) <- liftIO $ listDirRecur absDir
           -- Convert to relative paths by stripping the store path prefix
-          pure $ mapMaybe (toRelativePath absDir) files
+          let relPaths = mapMaybe (toRelativePath absDir) files
+          pure [SourceFile storePathName p | p <- relPaths]
         else pure []
 
 -- | Convert an absolute file path to a relative path by stripping the store dir prefix
@@ -195,13 +220,11 @@ toRelativePath storeDir filePath =
 -- Also returns a filtered outputToFiles map that only includes git-tracked files
 buildFileToOutputs ::
   Set (Path Rel File) ->
-  Map FlakeOutput (Set (Path Rel File)) ->
+  Map FlakeOutput (Set SourceFile) ->
   (Map (Path Rel File) (Set FlakeOutput), Map FlakeOutput (Set (Path Rel File)))
-buildFileToOutputs gitFiles outputToFiles =
+buildFileToOutputs gitFiles outputToSourceFiles =
   let -- For each output, find which git files match its source files
-      -- A git file matches if it ends with the source file path
-      -- (handles cases like "nix-rebuild-analyser/src/Foo.hs" matching "src/Foo.hs")
-      matchedOutputToFiles = Map.map (matchGitFiles gitFiles) outputToFiles
+      matchedOutputToFiles = Map.map (matchGitFiles gitFiles) outputToSourceFiles
       fileToOutputs =
         Map.fromListWith
           Set.union
@@ -211,14 +234,29 @@ buildFileToOutputs gitFiles outputToFiles =
           ]
    in (fileToOutputs, matchedOutputToFiles)
 
--- | Find git files that match the given source files
--- A git file matches if its path ends with the source file path
-matchGitFiles :: Set (Path Rel File) -> Set (Path Rel File) -> Set (Path Rel File)
+-- | Find git files that match the given source files.
+--
+-- A git file matches a source file if:
+-- 1. The git file path starts with the store path name (e.g., "nix-ci-blog/")
+-- 2. The remainder of the git file path equals the source file's relative path
+--
+-- For example:
+-- - SourceFile "nix-ci-blog" "test/Spec.hs" matches "nix-ci-blog/test/Spec.hs"
+-- - SourceFile "validity" "test/Spec.hs" does NOT match "nix-ci-blog/test/Spec.hs"
+matchGitFiles :: Set (Path Rel File) -> Set SourceFile -> Set (Path Rel File)
 matchGitFiles gitFiles sourceFiles =
   Set.fromList
     [ gitFile
     | gitFile <- Set.toList gitFiles,
       sourceFile <- Set.toList sourceFiles,
-      -- Check if gitFile ends with sourceFile
-      toFilePath sourceFile `isSuffixOf` toFilePath gitFile
+      matchesSourceFile gitFile sourceFile
     ]
+
+-- | Check if a git file matches a source file.
+-- The git file must start with the store path name followed by the source file's relative path.
+matchesSourceFile :: Path Rel File -> SourceFile -> Bool
+matchesSourceFile gitFile (SourceFile storePathName sourceRelPath) =
+  let gitFilePath = toFilePath gitFile
+      expectedPrefix = Text.unpack storePathName ++ "/"
+      expectedPath = expectedPrefix ++ toFilePath sourceRelPath
+   in gitFilePath == expectedPath

@@ -1,0 +1,24 @@
+{
+    "fileToOutputs": {
+        "src-a/lib/Util.hs": [
+            "packages.x86_64-linux.uses-a",
+            "packages.x86_64-linux.uses-both"
+        ],
+        "src-b/lib/Util.hs": [
+            "packages.x86_64-linux.uses-b",
+            "packages.x86_64-linux.uses-both"
+        ]
+    },
+    "outputToFiles": {
+        "packages.x86_64-linux.uses-a": [
+            "src-a/lib/Util.hs"
+        ],
+        "packages.x86_64-linux.uses-b": [
+            "src-b/lib/Util.hs"
+        ],
+        "packages.x86_64-linux.uses-both": [
+            "src-a/lib/Util.hs",
+            "src-b/lib/Util.hs"
+        ]
+    }
+}

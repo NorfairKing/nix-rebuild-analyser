@@ -1,0 +1,26 @@
+{
+    "fileToOutputs": {
+        "app/Main.hs": [
+            "checks.x86_64-linux.test",
+            "packages.x86_64-linux.default",
+            "packages.x86_64-linux.myapp"
+        ],
+        "lib/Lib.hs": [
+            "packages.x86_64-linux.mylib"
+        ]
+    },
+    "outputToFiles": {
+        "checks.x86_64-linux.test": [
+            "app/Main.hs"
+        ],
+        "packages.x86_64-linux.default": [
+            "app/Main.hs"
+        ],
+        "packages.x86_64-linux.myapp": [
+            "app/Main.hs"
+        ],
+        "packages.x86_64-linux.mylib": [
+            "lib/Lib.hs"
+        ]
+    }
+}

@@ -2,6 +2,9 @@
 
 module NixRebuildAnalyser
   ( nixRebuildAnalyserMain,
+    runAnalysis,
+    Settings (..),
+    AnalysisResult (..),
   )
 where
 

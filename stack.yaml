@@ -2,6 +2,7 @@ resolver: lts-24.16
 
 packages:
 - nix-rebuild-analyser
+- nix-rebuild-analyser-test
 
 ghc-options:
   "$locals": -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wcpp-undef -Wunused-packages
@@ -28,6 +29,12 @@ extra-deps:
   commit: 97a0e5481ca0ea489afd6189258cb4eb34a31734
   subdirs:
     - validity
+
+- github: NorfairKing/sydtest
+  commit: 9c7fc9b7de1b14f0586eede1c42546186e1fbc41
+  subdirs:
+    - sydtest
+    - sydtest-discover
 
 system-ghc: true
 nix:

@@ -82,6 +82,32 @@ packages:
   original:
     subdir: validity
     url: https://github.com/NorfairKing/validity/archive/97a0e5481ca0ea489afd6189258cb4eb34a31734.tar.gz
+- completed:
+    name: sydtest
+    pantry-tree:
+      sha256: ec2fa1ae3a18b577bea786e9fd150a0aec3138ef174b7414847ab56fc98ea4ca
+      size: 2397
+    sha256: b7f2c3b885c08a993413cd836b9997e81ea569ad822d8a63066c9d619f94c866
+    size: 407818
+    subdir: sydtest
+    url: https://github.com/NorfairKing/sydtest/archive/9c7fc9b7de1b14f0586eede1c42546186e1fbc41.tar.gz
+    version: 0.23.0.1
+  original:
+    subdir: sydtest
+    url: https://github.com/NorfairKing/sydtest/archive/9c7fc9b7de1b14f0586eede1c42546186e1fbc41.tar.gz
+- completed:
+    name: sydtest-discover
+    pantry-tree:
+      sha256: 14e85cfb0218573ded22275f771315f08a8801af0130a8ea111b34795cd776a9
+      size: 485
+    sha256: b7f2c3b885c08a993413cd836b9997e81ea569ad822d8a63066c9d619f94c866
+    size: 407818
+    subdir: sydtest-discover
+    url: https://github.com/NorfairKing/sydtest/archive/9c7fc9b7de1b14f0586eede1c42546186e1fbc41.tar.gz
+    version: 0.0.0.4
+  original:
+    subdir: sydtest-discover
+    url: https://github.com/NorfairKing/sydtest/archive/9c7fc9b7de1b14f0586eede1c42546186e1fbc41.tar.gz
 snapshots:
 - completed:
     sha256: 309392e77af949aff34933aff53070c774d274b0f2f7e314df665c0d322c7715

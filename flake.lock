@@ -128,6 +128,7 @@
         "opt-env-conf": "opt-env-conf",
         "pre-commit-hooks": "pre-commit-hooks",
         "safe-coloured-text": "safe-coloured-text",
+        "sydtest": "sydtest",
         "validity": "validity"
       }
     },
@@ -144,6 +145,22 @@
       "original": {
         "owner": "NorfairKing",
         "repo": "safe-coloured-text",
+        "type": "github"
+      }
+    },
+    "sydtest": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1769440996,
+        "narHash": "sha256-zrtAlgyaTyjglVNyalF59++8QAfeggwdaX7iShUwmgw=",
+        "owner": "NorfairKing",
+        "repo": "sydtest",
+        "rev": "9c7fc9b7de1b14f0586eede1c42546186e1fbc41",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NorfairKing",
+        "repo": "sydtest",
         "type": "github"
       }
     },

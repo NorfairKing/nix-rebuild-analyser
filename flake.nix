@@ -12,6 +12,8 @@
     safe-coloured-text.flake = false;
     opt-env-conf.url = "github:NorfairKing/opt-env-conf";
     opt-env-conf.flake = false;
+    sydtest.url = "github:NorfairKing/sydtest";
+    sydtest.flake = false;
   };
 
   outputs =
@@ -22,6 +24,7 @@
     , autodocodec
     , safe-coloured-text
     , opt-env-conf
+    , sydtest
     }:
     let
       system = "x86_64-linux";
@@ -33,6 +36,7 @@
           (import (autodocodec + "/nix/overlay.nix"))
           (import (safe-coloured-text + "/nix/overlay.nix"))
           (import (opt-env-conf + "/nix/overlay.nix"))
+          (import (sydtest + "/nix/overlay.nix"))
         ];
       };
     in
@@ -40,8 +44,7 @@
       overlays.default = import ./nix/overlay.nix;
 
       packages.${system} = {
-        default = pkgs.nixRebuildAnalyserRelease;
-        nix-rebuild-analyser = pkgs.nixRebuildAnalyserReleasePackages.nix-rebuild-analyser;
+        default = pkgs.nix-rebuild-analyser;
       };
 
       checks.${system} = {
@@ -64,7 +67,7 @@
 
       devShells.${system}.default = pkgs.haskellPackages.shellFor {
         name = "nix-rebuild-analyser-shell";
-        packages = p: builtins.attrValues p.nixRebuildAnalyserPackages;
+        packages = p: [ p.nix-rebuild-analyser ];
         withHoogle = true;
         buildInputs = with pkgs; [
           cabal-install
