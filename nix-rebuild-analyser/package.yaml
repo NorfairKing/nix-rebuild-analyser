@@ -1,0 +1,33 @@
+name: nix-rebuild-analyser
+version: 0.0.0.0
+license: GPL
+
+dependencies:
+- base >= 4.7 && < 5
+
+library:
+  source-dirs: src
+  dependencies:
+  - aeson
+  - bytestring
+  - containers
+  - monad-logger
+  - opt-env-conf
+  - path
+  - path-io
+  - safe-coloured-text
+  - safe-coloured-text-terminfo
+  - text
+  - typed-process
+  - unliftio
+
+executables:
+  nix-rebuild-analyser:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - nix-rebuild-analyser

@@ -1,0 +1,49 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.38.2.
+--
+-- see: https://github.com/sol/hpack
+
+name:           nix-rebuild-analyser
+version:        0.0.0.0
+license:        GPL
+build-type:     Simple
+
+library
+  exposed-modules:
+      NixRebuildAnalyser
+      NixRebuildAnalyser.Analyse
+      NixRebuildAnalyser.FlakeShow
+      NixRebuildAnalyser.OptParse
+      NixRebuildAnalyser.Output
+  other-modules:
+      Paths_nix_rebuild_analyser
+  hs-source-dirs:
+      src
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , monad-logger
+    , opt-env-conf
+    , path
+    , path-io
+    , safe-coloured-text
+    , safe-coloured-text-terminfo
+    , text
+    , typed-process
+    , unliftio
+  default-language: Haskell2010
+
+executable nix-rebuild-analyser
+  main-is: Main.hs
+  other-modules:
+      Paths_nix_rebuild_analyser
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , nix-rebuild-analyser
+  default-language: Haskell2010

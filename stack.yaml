@@ -1,0 +1,35 @@
+resolver: lts-24.16
+
+packages:
+- nix-rebuild-analyser
+
+ghc-options:
+  "$locals": -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates -Wpartial-fields -Widentities -Wredundant-constraints -Wcpp-undef -Wunused-packages
+
+extra-deps:
+- github: NorfairKing/opt-env-conf
+  commit: 32b5a2abef089e486c10fc09cd368d440b6a2aee
+  subdirs:
+    - opt-env-conf
+
+- github: NorfairKing/safe-coloured-text
+  commit: 046f10147a058c00c2706d98c341219e3cbc7669
+  subdirs:
+    - safe-coloured-text
+    - safe-coloured-text-terminfo
+
+- github: NorfairKing/autodocodec
+  commit: 3dbe8d515c9fc0fe6313dfe92e9db1f4af4c50a3
+  subdirs:
+    - autodocodec
+    - autodocodec-yaml
+
+- github: NorfairKing/validity
+  commit: 97a0e5481ca0ea489afd6189258cb4eb34a31734
+  subdirs:
+    - validity
+
+system-ghc: true
+nix:
+  enable: false
+with-hpack: hpack
